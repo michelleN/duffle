@@ -131,14 +131,14 @@ func (b *Builder) version(baseVersion, sha string) (string, error) {
 }
 
 // Build passes the context of each component to its respective builder
-func (b *Builder) Build(ctx context.Context, app *AppContext) error {
-	if err := buildInvocationImages(ctx, b.ImageBuilders, app); err != nil {
+func (b *Builder) Build(ctx context.Context, app *AppContext, bf *bundle.Bundle) error {
+	if err := buildInvocationImages(ctx, b.ImageBuilders, app, bf); err != nil {
 		return fmt.Errorf("error building image: %v", err)
 	}
 	return nil
 }
 
-func buildInvocationImages(ctx context.Context, imageBuilders []imagebuilder.ImageBuilder, app *AppContext) (err error) {
+func buildInvocationImages(ctx context.Context, imageBuilders []imagebuilder.ImageBuilder, app *AppContext, bf *bundle.Bundle) (err error) {
 	errc := make(chan error)
 
 	go func() {
@@ -147,13 +147,22 @@ func buildInvocationImages(ctx context.Context, imageBuilders []imagebuilder.Ima
 		wg.Add(len(imageBuilders))
 
 		for _, c := range imageBuilders {
-			go func(c imagebuilder.ImageBuilder) {
+			go func(c imagebuilder.ImageBuilder, b *bundle.Bundle) {
 				defer wg.Done()
 				err = c.Build(ctx, app.Log)
 				if err != nil {
 					errc <- fmt.Errorf("error building image %v: %v", c.Name(), err)
 				}
-			}(c)
+				for _, i := range b.InvocationImages {
+					if i.Image == c.URI() {
+						//save digest
+						fmt.Println("in here")
+						i.Digest = "something"
+						fmt.Println("b", b.InvocationImages)
+					}
+					fmt.Println("bf", b.InvocationImages)
+				}
+			}(c, bf)
 		}
 
 		wg.Wait()
