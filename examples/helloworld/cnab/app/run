@@ -7,6 +7,7 @@ name=$CNAB_INSTALLATION_NAME
 param=${CNAB_P_HELLO:-hello}
 
 echo "$param world"
+echo "hello world"
 case $action in
     install)
     echo "Install action"

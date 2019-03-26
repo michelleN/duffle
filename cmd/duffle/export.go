@@ -40,6 +40,7 @@ type exportCmd struct {
 	verbose      bool
 	insecure     bool
 	bundleIsFile bool
+	signer       string
 }
 
 func newExportCmd(w io.Writer) *cobra.Command {
@@ -64,6 +65,7 @@ func newExportCmd(w io.Writer) *cobra.Command {
 	f.BoolVarP(&export.thin, "thin", "t", false, "Export only the bundle manifest")
 	f.BoolVarP(&export.verbose, "verbose", "v", false, "Verbose output")
 	f.BoolVarP(&export.insecure, "insecure", "k", false, "Do not verify the bundle (INSECURE)")
+	f.StringVarP(&export.signer, "user", "u", "", "the user ID of the signing key to use. Format is either email address or 'NAME (COMMENT) <EMAIL>'")
 
 	return cmd
 }
@@ -81,7 +83,7 @@ func (ex *exportCmd) run() error {
 }
 
 func (ex *exportCmd) Export(bundlefile string, l loader.Loader) error {
-	exp, err := packager.NewExporter(bundlefile, ex.dest, ex.home.Logs(), l, ex.thin, ex.insecure)
+	exp, err := packager.NewExporter(bundlefile, ex.dest, ex.home.Logs(), l, ex.thin, ex.insecure, ex.signer, ex.home.SecretKeyRing())
 	if err != nil {
 		return fmt.Errorf("Unable to set up exporter: %s", err)
 	}

@@ -7,8 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
-	"time"
 
 	"github.com/Masterminds/semver"
 	"github.com/pkg/errors"
@@ -87,10 +85,10 @@ func (b *Builder) PrepareBuild(bldr *Builder, mfst *manifest.Manifest, appDir st
 			return nil, nil, err
 		}
 
-		ii := bundle.InvocationImage{}
-		ii.Image = imb.URI()
-		ii.ImageType = imb.Type()
-		bf.InvocationImages = append(bf.InvocationImages, ii)
+		//ii := bundle.InvocationImage{}
+		//ii.Image = imb.URI()
+		//ii.ImageType = imb.Type()
+		//bf.InvocationImages = append(bf.InvocationImages, ii)
 
 		baseVersion := mfst.Version
 		if baseVersion == "" {
@@ -132,53 +130,26 @@ func (b *Builder) version(baseVersion, sha string) (string, error) {
 
 // Build passes the context of each component to its respective builder
 func (b *Builder) Build(ctx context.Context, app *AppContext, bf *bundle.Bundle) error {
-	if err := buildInvocationImages(ctx, b.ImageBuilders, app, bf); err != nil {
+	if err := b.buildInvocationImages(ctx, app, bf); err != nil {
 		return fmt.Errorf("error building image: %v", err)
 	}
 	return nil
 }
 
-func buildInvocationImages(ctx context.Context, imageBuilders []imagebuilder.ImageBuilder, app *AppContext, bf *bundle.Bundle) (err error) {
-	errc := make(chan error)
-
-	go func() {
-		defer close(errc)
-		var wg sync.WaitGroup
-		wg.Add(len(imageBuilders))
-
-		for _, c := range imageBuilders {
-			go func(c imagebuilder.ImageBuilder, b *bundle.Bundle) {
-				defer wg.Done()
-				err = c.Build(ctx, app.Log)
-				if err != nil {
-					errc <- fmt.Errorf("error building image %v: %v", c.Name(), err)
-				}
-				for _, i := range b.InvocationImages {
-					if i.Image == c.URI() {
-						//save digest
-						fmt.Println("in here")
-						i.Digest = "something"
-						fmt.Println("b", b.InvocationImages)
-					}
-					fmt.Println("bf", b.InvocationImages)
-				}
-			}(c, bf)
-		}
-
-		wg.Wait()
-	}()
-
-	for errc != nil {
-		select {
-		case err, ok := <-errc:
-			if !ok {
-				errc = nil
-				continue
-			}
+func (b *Builder) buildInvocationImages(ctx context.Context, app *AppContext, bf *bundle.Bundle) (err error) {
+	built := []bundle.InvocationImage{}
+	for _, c := range b.ImageBuilders {
+		digest, err := c.Build(ctx, app.Log)
+		if err != nil {
 			return err
-		default:
-			time.Sleep(time.Second)
 		}
+		ii := bundle.InvocationImage{}
+		ii.Image = c.URI()
+		ii.ImageType = c.Type()
+		ii.Digest = digest
+		built = append(built, ii)
 	}
+	bf.InvocationImages = built
+
 	return nil
 }
