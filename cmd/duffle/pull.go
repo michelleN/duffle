@@ -1,41 +1,77 @@
 package main
 
 import (
+	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"strings"
+
+	"github.com/docker/cli/cli/config"
+	"github.com/docker/cnab-to-oci/remotes"
+	dref "github.com/docker/distribution/reference"
+	"github.com/spf13/cobra"
 
 	"github.com/deislabs/duffle/pkg/bundle"
 	"github.com/deislabs/duffle/pkg/loader"
 	"github.com/deislabs/duffle/pkg/reference"
-
-	"github.com/spf13/cobra"
 )
+
+const pullUsage = `Pulls a CNAB bundle into the cache without installing it. `
 
 var ErrNotSigned = errors.New("bundle is not signed")
 
+type pullCmd struct {
+	output             string
+	targetRef          string
+	insecureRegistries []string
+}
+
 func newPullCmd(w io.Writer) *cobra.Command {
-	const usage = `Pulls a CNAB bundle into the cache without installing it.
+	pull := &pullCmd{}
 
-Example:
-	$ duffle pull duffle/example:0.1.0
-`
-
-	var insecure bool
 	cmd := &cobra.Command{
-		Hidden: true,
-		Use:    "pull",
-		Short:  "pull a CNAB bundle from a repository",
-		Long:   usage,
+		Use:   "pull",
+		Short: "pull a CNAB bundle from a repository",
+		Long:  pullUsage,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return ErrUnderConstruction
+			return pull.run()
 		},
 	}
 
-	cmd.Flags().BoolVarP(&insecure, "insecure", "k", false, "Do not verify the bundle (INSECURE)")
+	f := cmd.Flags()
+	f.StringSliceVar(&pull.insecureRegistries, "insecure-registries", nil, "Use plain HTTP for those registries")
+	f.StringVarP(&pull.output, "output", "o", "", "output file")
 
 	return cmd
+}
+
+func createResolver(insecureRegistries []string) remotes.ResolverConfig {
+	return remotes.NewResolverConfigFromDockerConfigFile(config.LoadDefaultConfigFile(os.Stderr), insecureRegistries...)
+}
+
+func (p *pullCmd) run() error {
+	ref, err := dref.ParseNormalizedNamed(p.targetRef)
+	if err != nil {
+		return err
+	}
+	b, err := remotes.Pull(context.Background(), ref, createResolver(p.insecureRegistries).Resolver)
+	if err != nil {
+		return err
+	}
+	//TODO save it to local store after marshalling
+	bytes, err := json.MarshalIndent(b, "", "\t")
+	if err != nil {
+		return err
+	}
+	if p.output == "" {
+		fmt.Fprintln(os.Stdout, string(bytes))
+		return nil
+	}
+	return nil
+	//return ioutil.WriteFile(opts.output, bytes, 0644)
 }
 
 func getLoader(home string, insecure bool) (loader.Loader, error) {

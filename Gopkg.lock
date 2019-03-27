@@ -80,7 +80,7 @@
   revision = "3a771d992973f24aa725d07868b467d1ddfceafb"
 
 [[projects]]
-  digest = "1:c41ccacec3d1871a9a76c0a105cb4e50bd7d6489d91f0262e37ab66c3d79cc6a"
+  digest = "1:7b09e241728ee947f7a7ff9069c292693e076063657b23f9c00bf290c25ed1a8"
   name = "github.com/containerd/containerd"
   packages = [
     ".",
@@ -112,6 +112,8 @@
     "identifiers",
     "images",
     "images/archive",
+    "images/oci",
+    "labels",
     "leases",
     "leases/proxy",
     "log",
@@ -127,13 +129,15 @@
     "remotes/docker/schema1",
     "rootfs",
     "runtime/linux/runctypes",
+    "runtime/v2/runc/options",
     "snapshots",
     "snapshots/proxy",
     "sys",
+    "version",
   ]
   pruneopts = "NUT"
-  revision = "9754871865f7fe2f4e74d43e2fc7ccd237edcbce"
-  version = "v1.2.2"
+  revision = "42c3614d58767e96c1752977fed94d0b140a0173"
+  source = "github.com/simonferquel/containerd"
 
 [[projects]]
   branch = "master"
@@ -147,14 +151,6 @@
   ]
   pruneopts = "NUT"
   revision = "bd77b46c8352f74eb12c85bdc01f4b90f69d66b4"
-
-[[projects]]
-  digest = "1:a72272dfefbb22c87cda3dbefbb256741d861d2fb727210a66e0df0df6084b30"
-  name = "github.com/containerd/cri"
-  packages = ["pkg/util"]
-  pruneopts = "NUT"
-  revision = "f3687c59470b76ee57c90d4b3dd92888dec58c2b"
-  version = "v1.11.1"
 
 [[projects]]
   branch = "master"
@@ -213,6 +209,19 @@
   revision = "f95ca8e1ba6c22c9abcdbf65e8dcc39c53958bba"
 
 [[projects]]
+  branch = "master"
+  digest = "1:968188a585d82723744f2da31ba92e33d8240afda586473775a171ac14dd2638"
+  name = "github.com/docker/cnab-to-oci"
+  packages = [
+    "bundle",
+    "converter",
+    "remotes",
+  ]
+  pruneopts = "NUT"
+  revision = "43fb6c7558419fd48b9d4bc3b3587bbbf1c18721"
+  source = "github.com/michelleN/cnab-to-oci"
+
+[[projects]]
   digest = "1:a828cce5747a0ac32a41fd9644660a815cbc3c61caa85c03b0a651d62320aa0b"
   name = "github.com/docker/compose-on-kubernetes"
   packages = [
@@ -227,7 +236,7 @@
   version = "v0.4.18"
 
 [[projects]]
-  digest = "1:c2fd3505322eed56c220992927a13029d32b7fea0e9cc1ece7a2217369d76914"
+  digest = "1:aa4eb90e8e07f58c98a742e4bbdf98374bb13b4f67fa3bc46acd29dff5c7ed8d"
   name = "github.com/docker/distribution"
   packages = [
     ".",
@@ -248,7 +257,8 @@
     "uuid",
   ]
   pruneopts = "NUT"
-  revision = "83389a148052d74ac602f5f1d62f86ff2f3c4aa5"
+  revision = "2461543d988979529609e8cb6fca9ca190dc48da"
+  version = "v2.7.1"
 
 [[projects]]
   digest = "1:6e8fe686e68797b78d54d112f816448cf5d4bbf33c24c2cd12da0508ec600dc8"
@@ -907,9 +917,12 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:b521f10a2d8fa85c04a8ef4e62f2d1e14d303599a55d64dabf9f5a02f84d35eb"
+  digest = "1:04a5b0e4138f98eef79ce12a955a420ee358e9f787044cc3a553ac3c3ade997e"
   name = "golang.org/x/sync"
-  packages = ["errgroup"]
+  packages = [
+    "errgroup",
+    "semaphore",
+  ]
   pruneopts = "NUT"
   revision = "37e7f081c4d4c64e13b10787722085407fe5d15f"
 
@@ -1192,11 +1205,11 @@
     "github.com/docker/cli/cli/debug",
     "github.com/docker/cli/cli/flags",
     "github.com/docker/cli/opts",
+    "github.com/docker/cnab-to-oci/remotes",
     "github.com/docker/distribution/digestset",
     "github.com/docker/distribution/reference",
     "github.com/docker/docker/api/types",
     "github.com/docker/docker/api/types/container",
-    "github.com/docker/docker/api/types/mount",
     "github.com/docker/docker/api/types/strslice",
     "github.com/docker/docker/builder/dockerignore",
     "github.com/docker/docker/client",
@@ -1212,6 +1225,7 @@
     "github.com/gosuri/uitable",
     "github.com/oklog/ulid",
     "github.com/opencontainers/go-digest",
+    "github.com/pkg/errors",
     "github.com/renstrom/fuzzysearch/fuzzy",
     "github.com/sirupsen/logrus",
     "github.com/spf13/cobra",

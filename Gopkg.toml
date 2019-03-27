@@ -1,4 +1,14 @@
 [[constraint]]
+  name = "github.com/docker/cnab-to-oci"
+  source = "github.com/michelleN/cnab-to-oci"
+  branch = "master"
+
+[[constraint]]
+  name = "github.com/containerd/containerd"
+  source = "github.com/simonferquel/containerd"
+  revision = "42c3614d58767e96c1752977fed94d0b140a0173"
+
+[[constraint]]
   name = "github.com/spf13/cobra"
   version = "0.0.3"
 
@@ -9,10 +19,6 @@
 [[constraint]]
   name = "github.com/Masterminds/semver"
   version = "1.4.2"
-
-[[constraint]]
-  name = "github.com/Masterminds/vcs"
-  version = "1.11.1"
 
 [[constraint]]
   name = "github.com/sirupsen/logrus"
@@ -28,7 +34,7 @@
 
 [[override]]
   name = "github.com/docker/distribution"
-  revision = "83389a148052d74ac602f5f1d62f86ff2f3c4aa5"
+  version = "v2.7.1"
 
 [[override]]
   name = "github.com/docker/go-metrics"
